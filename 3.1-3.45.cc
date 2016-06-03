@@ -5,6 +5,7 @@
 using namespace std;
 
 int main(){
+	cout <<"*****************"<<endl;
 /*3.1*/
 #ifdef NUM31
 	cout<<"参见：http://blog.csdn.net/refuil/article/details/51226530 "
