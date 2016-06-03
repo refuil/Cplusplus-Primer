@@ -210,41 +210,6 @@ int main(){
 			cout<< c <<endl;
 		}
 	}
-#endif
-/*3.18*/
-#ifdef NUM318
-
-#endif
-/*3.19*/
-#ifdef NUM319
-
-#endif
-/*3.20*/
-#ifdef NUM320
-
-#endif
-
-/*3.11*/
-#ifdef NUM311
-	
-#endif
-/*3.12*/
-#ifdef NUM312
-
-#endif
-/*3.13*/
-#ifdef NUM313
-
-#endif
-/*3.14*/
-#ifdef NUM314
-
-#endif
-/*3.14*/
-#ifdef NUM314
-
-#endif
-
 
 
 
