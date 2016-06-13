@@ -1,21 +1,10 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <memory>
 #include "Chapter15.h"
 using namespace std;
-#define NUM1518
-
-/*15.3*/
-double print_total(ostream &os, const Quote &item, size_t n){
-	double ret = item.net_price(n);
-	os << "ISBN: " << item.isbn() << " # sold: "<< n << " total due: "<< ret << endl;
-	return ret;
-}
-/*15.11*/
-void print_debug(const Quote &q){
-	q.debug();
-}
-
+#define NUM1530
 
 int main(){
 /*15.1*/
@@ -187,43 +176,99 @@ int main(){
 #endif
 /*15.21*/
 #ifdef NUM1521
-
-#endif
-/*15.22*/
-#ifdef NUM1522
-
+	cout <<"见Chapter15.h"<<endl;
 #endif
 /*15.23*/
 #ifdef NUM1523
+	Base_23 bobj;
+	D1 d1obj;
+	D2 d2obj;
+    Base_23 *bp1 = &bobj, *bp2 = &d1obj, *bp3 = &d2obj;
+    bp1->fcn(); //虚调用，将在运行时调用Base_32::fcn()
+    bp2->fcn(); //虚调用，运行时调用D1::fcn 
+    bp3->fcn(); //虚调用， 运行时调用 D2::fcn   
+    D1 *d1p = &d1obj; D2 *d2p = &d2obj;
 
+    //bp2->f2();    //Base_32没有f2()的成员
+    d1p->f2();    //虚调用，运行时调用 D1::f2() 
+    d2p->f2();    //虚调用，运行时调用 D2::f2() 
 #endif
 /*15.24*/
 #ifdef NUM1524
-
+	cout<<"基类需要虚析构函数，在这些类完成动态绑定的同时，通过调用正确的析构函数来执行销毁操作."<<endl;
 #endif
 /*15.25*/
 #ifdef NUM1525
-
+	cout <<"会产生编译错误"          
+	"因为Bulk_quote中也有默认构造函数,而这个构造函数的状态是由Disc_quote的默认构造函数决定的;"
+	"Bulk_quote删除了默认构造函数,同时存在另一个4个参数的构造函数,所以编译器也不会再合成默认构造函数"<<endl;
 #endif
 /*15.26*/
 #ifdef NUM1526
-
+	Bulk_quote bq1;
+	Bulk_quote bq2("0-201-82470-1", 45, 3, 0.3);
+	bq2 = move(bq2);
+	print_total(cout, bq2, 20);
 #endif
 /*15.27*/
 #ifdef NUM1527
-
+	Bulk_quote bq("sss",20.0,2,0.3);
 #endif
-/*15.215*/
+/*15.218*/
 #ifdef NUM1528
+	 /**
+     *  outcome == 9090
+     */
+    vector<Quote> v;
+    for(unsigned i =1; i != 10; ++i)
+        v.push_back(Bulk_quote_27("sss", i * 10.1, 10, 0.3));
+
+    double total = 0;
+    for (const auto& b : v)
+    {
+        total += b.net_price(20);
+    }
+    cout << total << endl;
+
+    cout << "======================\n\n";
+
+    /**
+     *   outccome == 6363
+     */
+    vector<shared_ptr<Quote>> pv;    //多态
+
+    for(unsigned i =1; i != 10; ++i)
+        pv.push_back(make_shared<Bulk_quote_27>(Bulk_quote_27("sss", i * 10.1, 10, 0.3)));
+
+    double total_p = 0;
+    for (auto p : pv)
+    {
+        total_p +=  p->net_price(20);
+		print_total(cout, *p, 20);
+    }
+    cout << total_p << endl;
 
 #endif
-/*15.215*/
-#ifdef NUM15215
-
+/*15.29*/
+#ifdef NUM1529
+    //答案不一样 因为v保存的全部是Quote的对象(静态类型) 也就是说Bulk_quote强行转换成了Quote
+    //而pv保存的是(动态类型) 转换的仅是指针
 #endif
 /*15.30*/
 #ifdef NUM1530
+	Basket basket;
+    for (unsigned i = 0; i != 10; ++i)
+        basket.add_item(Bulk_quote("Bible",20.6,20,0.3));
 
+    for (unsigned i = 0; i != 10; ++i)
+        basket.add_item(Bulk_quote("C++Primer",30.9,5,0.4));
+
+    for (unsigned i = 0; i != 10; ++i)
+        basket.add_item(Quote("CLRS",40.1));
+
+    ofstream log("log.txt",ios_base::app|ios_base::out);
+
+    basket.total_receipt(log);
 #endif
 /*15.31*/
 #ifdef NUM1531
