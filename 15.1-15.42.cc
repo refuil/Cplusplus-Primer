@@ -258,13 +258,16 @@ int main(){
 #ifdef NUM1530
 	Basket basket;
     for (unsigned i = 0; i != 10; ++i)
-        basket.add_item(Bulk_quote("Bible",20.6,20,0.3));
+//        basket.add_item(Bulk_quote_27("Bible",20.6,20,0.3));
+        basket.add_item(make_shared<Bulk_quote_27>("Bible",20.6,20,0.3));
 
     for (unsigned i = 0; i != 10; ++i)
-        basket.add_item(Bulk_quote("C++Primer",30.9,5,0.4));
+//        basket.add_item(Bulk_quote_27("C++Primer",30.9,5,0.4));
+        basket.add_item(make_shared<Bulk_quote_27>("C++Primer",30.9,5,0.4));
 
     for (unsigned i = 0; i != 10; ++i)
-        basket.add_item(Quote("CLRS",40.1));
+//        basket.add_item(Quote("CLRS",40.1));
+        basket.add_item(make_shared<Quote>("CLRS",40.1));
 
     ofstream log("log.txt",ios_base::app|ios_base::out);
 
@@ -272,43 +275,101 @@ int main(){
 #endif
 /*15.31*/
 #ifdef NUM1531
-
+//!     (a) Query(s1) | Query(s2) & ~ Query(s3);
+//          OrQuery, AndQuery, NotQuery, WordQuery
+//!     (b) Query(s1) | (Query(s2) & ~ Query(s3));
+//			OrQuery, AndQuery, NotQuery, WordQuery
+//!     (c) (Query(s1) & (Query(s2)) | (Query(s3) & Query(s4)));
+//!         OrQuery, AndQuery, WordQuery
 #endif
 /*15.32*/
 #ifdef NUM1532
-
+	cout<<"拷贝，移动，赋值和销毁使用的都是编译器合成的版本。"
+		"拷贝，赋值：新对象的智能指针q将指向原对象中q指向的Query_base体系下的对象，"
+		"所以成员智能指针的use count加1；"
+		"移动：原对象的智能指针q指向空的nullptr，新对象指向原对象中成员的q指向的对象。use count不变。"
+		"销毁：对象成员智能指针q的use count -1，如果use count为0，则其对象就自动销毁。"<<endl;
 #endif
 /*15.33*/
 #ifdef NUM1533
-
+	cout<<"Query_base是一个纯虚类，没有自己的对象."<<endl;
 #endif
 /*15.34*/
 #ifdef NUM1534
-
+//(a)
+//	Query q = Query("fiery") & Query("bird") | Query("wind");
+// 1. Query::Query(const string &s)			  3次
+// 2. WordQuery::WordQuery(const string& s)   3次
+// 3. AndQuery::AndQuery(const Query &left, const Query &right);
+// 4. BinaryQuery(const Query &1, const BinaryQuery &r, string s);
+// 5. Query::Query(shared_ptr<Query_base> query)   2次
+// 6. OrQuery::OrQuery(const Query& left, const Query &right);
+// 7. BinaryQuery(const Query &l, const Query &r, string s);
+// 8. Query::Query(shared_ptr<Query_base> query);   2次
+//(b)
+//BinaryQuery
+//BinaryQuery
+//Query 
+//WordQuery
+//Query
+//WordQuery
+//Query
+//WordQuery
+//(c)
+//Query::eval() 
+//Query_base的派生类的各种eval
 #endif
 /*15.35*/
 #ifdef NUM1535
-
+    cout <<"见Chapter15.h"<<endl;
 #endif
 /*15.36*/
 #ifdef NUM1536
-
+    ifstream file("test.txt");
+    TextQuery tQuery(file);
+    Query q = Query("wind");
+    cout << q.eval(tQuery);
 #endif
 /*15.37*/
 #ifdef NUM1537
-
+    cout <<"不需要改变"<<endl;
 #endif
 /*15.38*/
 #ifdef NUM1538
-
+    BinaryQuery a = Query("fiery") & Query("bird");
+//不合法   纯虚类没有对象
+    AndQuery b = Query("fiery") & Query("bird");
+//不合法   &操作后返回的是Query的对象  无法转换为AndQuery的对象    
+    OrQuery c = Query("fiery") & Query("bird");
+//不合法   &操作后返回的是Query的对象  无法转换为OrQuery的对象
 #endif
-/*15.315*/
-#ifdef NUM15315
-
+/*15.39*/
+#ifdef NUM1539
+    ifstream file("test.txt");
+    TextQuery tQuery(file);
+    Query q = Query("fieryzzz")  | Query("wind");
+    cout << q.eval(tQuery);
 #endif
 /*15.40*/
 #ifdef NUM1540
+    cout <<"不会发生什么，因为make_shared会自动分配一个新的set。"<<endl;
+#endif
+/*15.42*/
+#ifdef NUM1542
+    //引入一个历史系统，用户通过编号查询之前的查询操作，可以增加内容或者将其与其他查询组合
+    ifstream fin("test.txt");
+    TextQuery text(fin);
+    QueryHistory history;
+    Query q0("Alice");
+    Query q1("hair");
+    Query q2("Daddy");
 
+    history.add_query(q0);
+    history.add_query(q1);
+    history[0] = history[0] | q2;
+
+    auto result = history[0].eval(text);
+    print(cout, result);
 #endif
 	return 0;
 }
