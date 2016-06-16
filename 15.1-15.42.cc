@@ -4,7 +4,134 @@
 #include <memory>
 #include "Chapter15.h"
 using namespace std;
-#define NUM1530
+#define NUM1539
+
+
+/*15.35*/
+// constructor
+inline
+StrBlob::StrBlob(initializer_list<string> il): 
+              data(make_shared<vector<string>>(il)) { }
+
+inline
+string& StrBlobPtr::deref() const{
+    auto p = check(curr, "dereference past end"); 
+    return (*p)[curr];  // (*p) is the vector to which this object points
+}
+
+inline
+shared_ptr<vector<string>> 
+StrBlobPtr::check(size_t i, const string &msg) const{
+    auto ret = wptr.lock();   // is the vector still around?
+    if (!ret)
+        throw runtime_error("unbound StrBlobPtr");
+
+    if (i >= ret->size()) 
+        throw out_of_range(msg);
+    return ret; // otherwise, return a shared_ptr to the vector
+}
+
+// prefix: return a reference to the incremented object
+inline
+StrBlobPtr& StrBlobPtr::incr(){
+    // if curr already points past the end of the container, can't increment it
+    check(curr, "increment past end of StrBlobPtr");
+    ++curr;       // advance the current state
+    return *this;
+}
+
+inline
+StrBlobPtr& StrBlobPtr::decr(){
+    // if curr is zero, decrementing it will yield an invalid subscript
+    --curr;       // move the current state back one element}
+    check(-1, "decrement past begin of StrBlobPtr");
+    return *this;
+}
+
+// begin and end members for StrBlob
+inline
+StrBlobPtr
+StrBlob::begin() {
+    return StrBlobPtr(*this);
+}
+
+inline
+StrBlobPtr
+StrBlob::end() {
+    auto ret = StrBlobPtr(*this, data->size());
+    return ret; 
+}
+
+// named equality operators for StrBlobPtr
+inline
+bool eq(const StrBlobPtr &lhs, const StrBlobPtr &rhs){
+    auto l = lhs.wptr.lock(), r = rhs.wptr.lock();
+    // if the underlying vector is the same 
+    if (l == r) 
+        // then they're equal if they're both null or 
+        // if they point to the same element
+        return (!r || lhs.curr == rhs.curr);
+    else
+        return false; // if they point to difference vectors, they're not equal
+}
+
+inline
+bool neq(const StrBlobPtr &lhs, const StrBlobPtr &rhs){
+    return !eq(lhs, rhs); 
+}
+
+/**
+ * @brief constructor using StrBlob.
+ */
+TextQuery::TextQuery(ifstream &fin) : file(StrBlob()), wordMap(map<string,shared_ptr<set<line_no>>>()){
+    string line;
+    //! each line
+    while(getline(fin, line))
+    {
+        file.push_back(line);
+        int n = file.size() - 1;    //! the current line number
+
+        //! each word
+        stringstream lineSteam(line);
+        string word;
+        while(lineSteam >> word) {
+            shared_ptr<set<line_no>>&                          
+                           sp_lines = wordMap[word];
+            //! if null
+            if(!sp_lines)  {
+                sp_lines.reset(new set<line_no>);
+            }
+            sp_lines->insert(n);
+        }
+    }
+}
+
+/**
+ * @brief do a query opertion and return QueryResult object.
+ */
+QueryResult
+TextQuery::query(const string &sought) const{
+    //! dynamicaly allocated set used for the word does not appear.
+    static shared_ptr<set<line_no>> noData(new set<line_no>);
+
+    //! fetch the iterator to the matching element in the map<word, lines>.
+    //map<string, shared_ptr<set<index_Tp>>>::const_iterator
+    auto iter = wordMap.find(sought);
+    if(iter == wordMap.end())
+        return QueryResult(sought, noData, file);
+    else
+        return QueryResult(sought, iter->second, file);
+}
+
+ostream& print(ostream &os, const QueryResult &qr){
+	os <<"The result of your query "<< qr.sought <<" is: \n";
+	for (const auto &index: *qr.sp_lines){
+		os << "\t(line " << index + 1 << ")";
+		const StrBlobPtr wp(qr.file, index);
+		os << wp.deref() << "\n";
+	}
+	return os;
+}
 
 int main(){
 /*15.1*/
